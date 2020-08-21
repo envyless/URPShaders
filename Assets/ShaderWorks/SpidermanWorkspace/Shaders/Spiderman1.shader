@@ -49,7 +49,7 @@
 				float fogCoord : TEXCOORD1;
 				float3 normal : NORMAL;
 				//float4 shadowCoord : TEXCOORD2;
-				float2 screenUV : TEXCOORD2;
+				float4 screenUV : TEXCOORD2;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
@@ -98,15 +98,21 @@
 				
 				float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
 				float a = col.a;
-				float4 decoColor = SAMPLE_TEXTURE2D(_DecoTex, sampler_DecoTex, i.screenUV.xy * 10);
+				
+				//deco region
+				/*float2 uv = (i.screenUV.xy /i.screenUV.w) * 20;
+				uv.x *= (_ScreenParams.x / _ScreenParams.y); 								
+				float4 decoColor = SAMPLE_TEXTURE2D(_DecoTex, sampler_DecoTex, uv);
 				col = decoColor;
 				col.a = a;
+				*/
 				
-				float NdotL = saturate(dot(_MainLightPosition.xyz, i.normal));
+				float3 lightDir = mainLight.direction; //float3(1,0,0);
+				float NdotL = saturate(dot(lightDir, i.normal));
 				half3 ambient = SampleSH(i.normal);
-				
-				col.rgb *= NdotL * _MainLightColor.rgb * mainLight.shadowAttenuation * mainLight.distanceAttenuation + ambient;
-				col.rgb = MixFog(col.rgb, i.fogCoord);
+				col.rgb *= NdotL;
+				//col.rgb *= NdotL * _MainLightColor.rgb * mainLight.shadowAttenuation * mainLight.distanceAttenuation + ambient;
+				//col.rgb = MixFog(col.rgb, i.fogCoord);
 				
 				return col;				
 			}
